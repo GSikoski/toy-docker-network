@@ -1,0 +1,10 @@
+services:
+  rest-cont:
+    build:
+      context: ../
+      dockerfile: ./docker/api/Dockerfile
+    ports:
+      - 80
+    deploy:
+      mode: replicated
+      replicas: 2
