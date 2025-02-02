@@ -1,25 +1,32 @@
-from fastapi import FastAPI, Depends
+from datetime import timedelta
+from fastapi import FastAPI, Depends, HTTPException, status
 from typing import Annotated
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from ..rest_classes.message import Message, UserCreate, User
-from passlib.context import CryptContext
-from ..db.db import create_user
+from ..db.db import create_user, get_user
 import logging
 from uuid import uuid4
+from jwt import decode
+from .auth import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    SECRET_KEY,
+    ALGORITHM,
+    Token,
+    TokenData,
+    authenticate_user,
+    create_access_token,
+    get_password_hash,
+)
+from jwt.exceptions import InvalidTokenError
 
 logger = logging.getLogger("uvicorn")
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "f6b6ea644461bf90d533f870fa840c3442b118278a01a06f1c07fd99cc5d1580"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": get_user("string")}
 
 
 @app.get("/items/")
@@ -32,7 +39,22 @@ def fake_decode_token(token) -> User:
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    user = fake_decode_token(token)
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except InvalidTokenError:
+        raise credentials_exception
+    user = get_user(username=token_data.username)
+    if user is None:
+        raise credentials_exception
     return user
 
 
@@ -55,10 +77,26 @@ async def send(message: str):
 
 @app.post("/newuser")
 async def send(user_create: UserCreate):
-    user = User(id=uuid4(), name=user_create.name, messages=[])
+    hash: str = get_password_hash(user_create.password)
+    user: User = User(
+        id=uuid4(), name=user_create.name, messages=[], password_hash=hash
+    )
     create_user(user)
-    return {"message": "Recieved"}
 
 
-def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+@app.post("/token")
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+) -> Token:
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.name}, expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")

@@ -14,8 +14,9 @@ class User(BaseModel):
     id: UUID
     name: str
     password_hash: str
-    messages: List[Message] | None
+    messages: List[Message] | None = None
 
 
 class UserCreate(BaseModel):
     name: str
+    password: str
