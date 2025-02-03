@@ -2,6 +2,7 @@ from datetime import timedelta
 from fastapi import FastAPI, Depends, HTTPException, status
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 from ..rest_classes.message import Message, UserCreate, User
 from ..db.db import create_user, get_user
 import logging
@@ -22,6 +23,18 @@ from jwt.exceptions import InvalidTokenError
 logger = logging.getLogger("uvicorn")
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+origins = [
+    "http://localhost:4200",
+    "http://127.0.0.1:4200",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -65,7 +78,6 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
 
 @app.post("/send")
 async def send(message: Message):
-
     return {"message": "Recieved"}
 
 
