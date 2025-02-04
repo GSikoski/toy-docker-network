@@ -1,7 +1,8 @@
 import { Component, Injectable  } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { SendSendstrPost$Params } from './api/fn/operations/send-sendstr-post';
+import { ApiService } from './api/services';
 
 @Component({
   selector: 'app-root',
@@ -17,13 +18,12 @@ export class AppComponent {
   title = 'ui';
   userInput: string = '';
 
-  private apiUrl = 'http://127.0.0.1:8000/sendstr?message=' ;  // Replace with your API URL
-
-  constructor(private http: HttpClient) {};
+  // TODO: Don't assume port 8000 
+  constructor(private apiService: ApiService) {apiService.rootUrl = "http://127.0.0.1:8000"};
 
   sendMessage(){
-    let url:string  = this.apiUrl + this.userInput
-    this.http.post(url, null).subscribe(data => {console.log(data)});
+    const param: SendSendstrPost$Params = {message:this.userInput}
+    this.apiService.sendSendstrPost(param).subscribe(data => console.log(data))
   }
 
   submitInput() {

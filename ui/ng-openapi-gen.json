@@ -1,0 +1,6 @@
+{
+    "input": "./openapi.json",
+    "output": "src/app/api",
+    "removeStaleFiles": true,
+    "baseUrl": "http://127.0.0.1:8000"
+}
