@@ -3,11 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SendSendstrPost$Params } from './api/fn/operations/send-sendstr-post';
 import { ApiService } from './api/services';
+import { LoginComponent } from "./login/login.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule],
+  imports: [RouterOutlet, FormsModule, LoginComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.sass'
 })
