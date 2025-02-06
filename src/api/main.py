@@ -96,7 +96,7 @@ async def send(user_create: UserCreate):
     )
     create_user(user)
 
-
+# TODO: Needs error handling on incorrect input
 @app.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],

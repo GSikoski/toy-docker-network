@@ -4,9 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { ApiService } from '../api/services';
 import { LoginForAccessTokenTokenPost$Params } from '../api/fn/operations/login-for-access-token-token-post';
 import { BodyLoginForAccessTokenTokenPost } from '../api/models';
-import { Token } from '@angular/compiler';
 import { User } from '../models/user';
-import { ReadUsersMeUsersMeGet$Params } from '../api/fn/operations/read-users-me-users-me-get';
 
 @Component({
   selector: 'app-login',
@@ -43,14 +41,19 @@ export class LoginComponent {
 
     this.apiService.loginForAccessTokenTokenPost(params).subscribe(
       data => {
-        // const params : ReadUsersMeUsersMeGet$Params = {}
-        // this.apiService.readUsersMeUsersMeGet().subscribe(
-
-        // )
-        console.log(data);
+        localStorage.setItem("access_token", data.access_token) //sus, not sure how consistent this is without a listener
       })
 
+    this.getUser()
 
+  }
 
+  getUser(){
+    let user: User | null = null;
+    this.apiService.readUsersMeUsersMeGet().subscribe(data => {
+      user = new User(data.name);
+    })
+    this.user = user;
+    localStorage.setItem("user", this.user!.username)
   }
 }
