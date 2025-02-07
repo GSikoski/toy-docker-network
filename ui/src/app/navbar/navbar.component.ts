@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
+import { SharedService } from '../shared.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,5 +9,6 @@ import { Component } from '@angular/core';
   styleUrl: './navbar.component.sass'
 })
 export class NavbarComponent {
-
+  username = computed(() => this.sharedService.username())
+  constructor(private sharedService:SharedService){}
 }

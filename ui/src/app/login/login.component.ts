@@ -5,6 +5,7 @@ import { ApiService } from '../api/services';
 import { LoginForAccessTokenTokenPost$Params } from '../api/fn/operations/login-for-access-token-token-post';
 import { BodyLoginForAccessTokenTokenPost } from '../api/models';
 import { User } from '../models/user';
+import { SharedService } from '../shared.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginComponent {
   loginForm!: FormGroup;
   user: User | null = null;
   
-  constructor( private fb: FormBuilder, private apiService: ApiService){
+  constructor( private fb: FormBuilder, private apiService: ApiService, private sharedService: SharedService){
     this.initialiseForm()
     apiService.rootUrl = "http://127.0.0.1:8000"
   }
@@ -52,8 +53,8 @@ export class LoginComponent {
     let user: User | null = null;
     this.apiService.readUsersMeUsersMeGet().subscribe(data => {
       user = new User(data.name);
+      this.user = user;
+      this.sharedService.username.set(this.user.username);
     })
-    this.user = user;
-    localStorage.setItem("user", this.user!.username)
   }
 }
