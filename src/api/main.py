@@ -22,12 +22,12 @@ from jwt.exceptions import InvalidTokenError
 
 logger = logging.getLogger("uvicorn")
 app = FastAPI()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -36,6 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @app.get("/")
 async def root():
@@ -95,7 +96,7 @@ async def send(user_create: UserCreate):
     )
     create_user(user)
 
-
+# TODO: Needs error handling on incorrect input
 @app.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
