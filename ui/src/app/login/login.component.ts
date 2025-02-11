@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../api/services';
 import { LoginForAccessTokenTokenPost$Params } from '../api/fn/operations/login-for-access-token-token-post';
 import { BodyLoginForAccessTokenTokenPost } from '../api/models';
 import { User } from '../models/user';
 import { SharedService } from '../shared.service';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
@@ -17,6 +18,7 @@ import { SharedService } from '../shared.service';
 export class LoginComponent {
   loginForm!: FormGroup;
   user: User | null = null;
+  authService = inject(AuthService)
   
   constructor( private fb: FormBuilder, private apiService: ApiService, private sharedService: SharedService){
     this.initialiseForm()
@@ -42,11 +44,13 @@ export class LoginComponent {
 
     this.apiService.loginForAccessTokenTokenPost(params).subscribe(
       data => {
-        localStorage.setItem("access_token", data.access_token) //sus, not sure how consistent this is without a listener
-      })
+        this.authService.setToken(data.access_token)
+      }
+    )
 
-    this.getUser()
-
+    setTimeout(() => {
+      this.getUser();
+    }, 200)
   }
 
   getUser(){
