@@ -7,4 +7,14 @@ services:
       - 80
     deploy:
       mode: replicated
+      replicas: 1
+  
+  ui-cont:
+    build:
+      context: ../
+      dockerfile: ./docker/ui/Dockerfile
+    ports:
+      - 4200
+    deploy:
+      mode: replicated
       replicas: 2
