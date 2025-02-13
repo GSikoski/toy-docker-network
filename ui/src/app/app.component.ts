@@ -20,8 +20,8 @@ export class AppComponent {
   title = 'ui';
   userInput: string = '';
 
-  // TODO: Don't assume port 8000 
-  constructor(private apiService: ApiService) {apiService.rootUrl = "http://127.0.0.1:8000"};
+  // TODO: Don't assume port 8060 
+  constructor(private apiService: ApiService) {apiService.rootUrl = "http://127.0.0.1:8060"};
 
   sendMessage(){
     const param: SendSendstrPost$Params = {message:this.userInput}

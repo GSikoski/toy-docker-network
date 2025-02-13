@@ -1,20 +1,26 @@
+networks:
+  mynetwork:
 services:
-  rest-cont:
+  api:
+    container_name: API
+    env_file: ".env"
     build:
       context: ../
       dockerfile: ./docker/api/Dockerfile
     ports:
-      - 80
-    deploy:
-      mode: replicated
-      replicas: 1
+      - "${DOCKER_API_PORT}:80"
+    networks:
+      - mynetwork
+    
   
-  ui-cont:
+  ui:
     build:
       context: ../
       dockerfile: ./docker/ui/Dockerfile
     ports:
-      - 4200
+      - "${DOCKER_UI_MIN_PORT}-${DOCKER_UI_MAX_PORT}:4200"
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: "${DOCKER_UI_COUNT}"
+    networks:
+      - mynetwork
