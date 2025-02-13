@@ -19,14 +19,19 @@ from .auth import (
     get_password_hash,
 )
 from jwt.exceptions import InvalidTokenError
+import os
 
 logger = logging.getLogger("uvicorn")
 app = FastAPI()
 
 origins = [
     "http://localhost:4200",
-    "http://127.0.0.1:4200",
 ]
+
+for port in range(
+    int(os.environ["DOCKER_UI_MIN_PORT"]), int(os.environ["DOCKER_UI_MAX_PORT"]) + 1
+):
+    origins.append("http://localhost:" + str(port))
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,6 +42,7 @@ app.add_middleware(
 )
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 @app.get("/")
 async def root():
@@ -95,6 +101,7 @@ async def send(user_create: UserCreate):
         id=uuid4(), name=user_create.name, messages=[], password_hash=hash
     )
     create_user(user)
+
 
 # TODO: Needs error handling on incorrect input
 @app.post("/token")
